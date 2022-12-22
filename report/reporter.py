@@ -1,3 +1,5 @@
+import datetime
+
 from apiclient.discovery import build
 from oauth2client.service_account import ServiceAccountCredentials
 
@@ -40,4 +42,29 @@ class Report(object):
     def response(self, start='7daysAgo', end='yesterday'):
 
         response = self.initialize_analyticsreporting(start, end)
-        return response
+
+        ad_columns_list = []
+        for row in response['reports']:
+            ad_columns_list.append(row['columnHeader']['dimensions'][0].replace('ga:', ''))
+            for r in row['columnHeader']['metricHeader']['metricHeaderEntries']:
+                ad_columns_list.append(r['name'].replace('ga:adsense', ''))
+
+        if start == '7daysAgo':
+            # データフレーム用のデータを取得
+            ad_lists = [[row['dimensions'][0]] + row['metrics'][0]['values'] for row in response['reports'][0]['data']['rows']]
+        else:
+            ad_lists = [[row['dimensions'][0]] + row['metrics'][0]['values'] for row in response['reports'][0]['data']['rows']]
+            last_date = ad_lists[-1:][0][0]
+
+            if last_date != end.replace('-', ''):
+                last_date_obj = datetime.datetime.strptime(last_date, '%Y%m%d')
+                last_date_next_obj = last_date_obj + datetime.timedelta(days=1)
+                new_start = last_date_next_obj.strftime('%Y-%m-%d')
+
+                response = self.initialize_analyticsreporting(new_start, end)
+
+                ad_lists_2 = [[row['dimensions'][0]] + row['metrics'][0]['values'] for row in response['reports'][0]['data']['rows']]
+
+                ad_lists = ad_lists + ad_lists_2
+
+        return ad_columns_list, ad_lists
