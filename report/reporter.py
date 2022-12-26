@@ -35,6 +35,9 @@ class Report(object):
         # レポートのバリューをデータフレーム用にリスト内包表記で取得
         ad_lists = [[rows['dimensions'][0]] + rows['metrics'][0]['values'] for rows in response['reports'][0]['data']['rows']]
         
+        """
+        一旦以下のコードは廃止
+
         if start != '7daysAgo':
             # start変数が「7daysAgo」以外だった場合に実行される処理
 
@@ -59,26 +62,42 @@ class Report(object):
 
                 # 最初のレポートと続きのレポートをまとめる
                 ad_lists = ad_lists + ad_lists_2
-
+        """
         return ad_columns_list, ad_lists
 
     def requests(self, start, end, dimensions, metrics):
 
-        # self.dimensionsを作成
+        dimensions = self.dimensions(dimensions)
+        # self.dimensions_filterメソッドの追加
         metrics = self.metrics(metrics)
 
         body={
                 'reportRequests': [{
                     'viewId': self.VIEW_ID,
                     'dateRanges': [{'startDate': start, 'endDate': end}],
-                    'dimensions': [{'name': 'ga:date'}],
+                    'dimensions': [],
                     'metrics': [],
                 }]
         }
 
+        body['reportRequests'][0]['dimensions'] = dimensions
         body['reportRequests'][0]['metrics'] = metrics
 
         return body
+
+    def dimensions(self, dimensions_name):
+        # dimensions名の取得
+        
+        if dimensions_name:
+            dimensions_result = []
+
+            if type(dimensions_name) != type(dimensions_result): 
+                dimensions_name = [dimensions_name]
+            
+            for dimension in dimensions_name:
+                dimensions_result.append({'name': 'ga:{}'.format(dimension)})
+        print(dimensions_result)
+        return dimensions_result
 
     def metrics(self, metrics_name):
         # metricsデータの取得
