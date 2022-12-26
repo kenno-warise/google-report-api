@@ -1,1 +1,1 @@
-[{"expression": "ga:pageviews"}, {"expression": "ga:users"}]
+[{"expression": "ga:users"}, {"expression": "ga:newUsers"}, {"expression": "ga:percentNewSessions"}, {"expression": "ga:sessionsPerUser"}]
