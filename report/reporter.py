@@ -96,7 +96,6 @@ class Report(object):
             
             for dimension in dimensions_name:
                 dimensions_result.append({'name': 'ga:{}'.format(dimension)})
-        print(dimensions_result)
         return dimensions_result
 
     def metrics(self, metrics_name):
