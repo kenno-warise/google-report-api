@@ -82,6 +82,8 @@ print('レポートの値', datas)
 
 ## dimensionsとmetricsの値
 
+dimensionsはmetricsによりますが、複数設定可能です。
+
 |dimensions名|内容|
 |---|---|
 |date|日付|
