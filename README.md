@@ -13,5 +13,33 @@ Pythonで構築したGoogleAnalyticsのレポートを簡易的に取得でき�
 gitのクローンを使ってモジュールをダウンロードします。
 
 ```
-$ git clone
+$ git clone https://github.com/kenno-warise/google-report-api.git
+```
+
+ディレクトリを確認を確認すると、「google-report-api」が作成されています。
+「cd」コマンドで移動して、仮想構築します。
+
+```
+$ ls
+google-report-api
+
+$ cd google-report_api
+
+$ ls -a
+.  ..  .git  .gitignore  .python-version  README.md  report  requirements.txt
+
+$ python3 --version
+Python 3.7.0
+
+$ python3 -m venv venv
+```
+
+仮想環境ができたら、切り替えて必要なパッケージをインストールします。
+
+```
+$ . venv/bin/activate
+
+(venv)$ pip install --upgrade pip
+
+(venv)$ pip install -r requirements.txt
 ```
