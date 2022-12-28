@@ -82,6 +82,10 @@ print('レポートの値', datas)
 
 ## dimensionsとmetricsの値
 
+```
+report.response(start, end, dimensions=[...], metrics='...')
+```
+
 dimensionsはmetricsによりますが、複数設定可能です。
 
 |dimensions名|内容|
