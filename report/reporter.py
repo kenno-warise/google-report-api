@@ -13,7 +13,11 @@ class Report(object):
         self.KEY_FILE = key_file
         self.VIEW_ID = view_id
 
-    def initialize_analyticsreporting(self, start, end, requests):
+    def initialize_analyticsreporting(self, requests):
+        """
+        requests変数には取得したいレポート内容が辞書型で格納されている。
+        よってresponse変数にはレポート内容による値が格納される
+        """
         credentials = ServiceAccountCredentials.from_json_keyfile_name(self.KEY_FILE, self.SCOPES)
         analytics = build('analyticsreporting', 'v4', credentials=credentials)
         response = analytics.reports().batchGet(body=requests).execute()
@@ -23,7 +27,7 @@ class Report(object):
     def response(self, start='7daysAgo', end='yesterday', dimensions='date', metrics='adsense'):
 
         requests = self.requests(start, end, dimensions, metrics)
-        response = self.initialize_analyticsreporting(start, end, requests)
+        response = self.initialize_analyticsreporting(requests)
 
         # レポートのディメンション名とメトリックス名を取得する処理
         ad_columns_list = []
@@ -111,6 +115,9 @@ class Report(object):
 
 
 if __name__ == '__main__':
+    """
+    このスクリプトファイルが実行された時だけ処理される。
+    """
     with open('/mnt/c/Users/warik/Documents/PYTHON/science/GoogleアナリティクスAPI/view_id.txt', 'r') as f:
         view_id = f.read()
     
