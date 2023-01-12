@@ -126,8 +126,8 @@ df = pd.DataFrame(datas, columns=columns)
 df.head()
 ```
 
-||ga:date|ga:users|ga:newUsers|ga:percentNewSessions|ga:sessionsPerUser|ga:totalPublisherECPM|
-|----|----|----|----|----|----|
+|#|ga:date|ga:users|ga:newUsers|ga:percentNewSessions|ga:sessionsPerUser|
+|----|----|----|----|----|----|----|
 |0|20230105|374|301|73.05825242718447|1.1016042780748663|
 |1|20230106|422|341|74.29193899782135|1.0876777251184835|
 |2|20230107|222|190|77.8688524590164|1.0990990990990992|
