@@ -108,3 +108,15 @@ class Report(object):
             metrics_result = json.loads(str_obj)
 
         return metrics_result
+
+
+if __name__ == '__main__':
+    with open('/mnt/c/Users/warik/Documents/PYTHON/science/GoogleアナリティクスAPI/view_id.txt', 'r') as f:
+        view_id = f.read()
+    
+    KEY_FILE = '/mnt/c/Users/warik/Documents/PYTHON/science/GoogleアナリティクスAPI/client_secrets.json'
+    report = Report(key_file=KEY_FILE, view_id=view_id)
+    columns, datas = report.response()
+    print(columns)
+    print('-------')
+    print(datas)
