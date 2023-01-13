@@ -24,21 +24,29 @@ class Report(object):
 
         return response
 
-    def response(self, start='7daysAgo', end='yesterday', dimensions='date', metrics='adsense'):
+    def response(self, start='7daysAgo', end='yesterday', dimensions='date', metrics='adsense', dimensions_filter=None):
 
-        requests = self.requests(start, end, dimensions, metrics)
+        requests = self.requests(start, end, dimensions, metrics, dimensions_filter)
         response = self.initialize_analyticsreporting(requests)
 
         # レポートのディメンション名とメトリックス名を取得する処理
         ad_columns_list = []
         for rows in response['reports']:
             ad_columns_list.append(rows['columnHeader']['dimensions'][0])
+            if len(requests['reportRequests'][0]['dimensions']) > 1:
+                ad_columns_list.append(rows['columnHeader']['dimensions'][1])
             for row in rows['columnHeader']['metricHeader']['metricHeaderEntries']:
                 ad_columns_list.append(row['name'])
 
-        # レポートのバリューをデータフレーム用にリスト内包表記で取得
-        ad_lists = [[rows['dimensions'][0]] + rows['metrics'][0]['values'] for rows in response['reports'][0]['data']['rows']]
-        
+        try: # dimensions_filter次第では値が無い可能性があるので特設tra＆error文
+            # レポートのバリューをデータフレーム用にリスト内包表記で取得
+            if len(requests['reportRequests'][0]['dimensions']) > 1:
+                ad_lists = [[rows['dimensions'][0], rows['dimensions'][1]] + rows['metrics'][0]['values'] for rows in response['reports'][0]['data']['rows']]
+            else:
+                ad_lists = [[rows['dimensions'][0]] + rows['metrics'][0]['values'] for rows in response['reports'][0]['data']['rows']]
+        except KeyError:
+            ad_lists = response['reports'][0]['data']['totals'][0]['values']
+            print('dimensions_filter Error: {}には値がありません'.format(requests['reportRequests'][0]['dimensionFilterClauses'][0]['filters']))
         """
         一旦以下のコードは廃止
 
@@ -69,10 +77,10 @@ class Report(object):
         """
         return ad_columns_list, ad_lists
 
-    def requests(self, start, end, dimensions, metrics):
+    def requests(self, start, end, dimensions, metrics, dimensions_filter):
 
         dimensions = self.dimensions(dimensions)
-        # self.dimensions_filterメソッドの追加
+        dimensions_filter = self.dimensions_filter(dimensions_filter)
         metrics = self.metrics(metrics)
 
         body={
@@ -86,7 +94,9 @@ class Report(object):
 
         body['reportRequests'][0]['dimensions'] = dimensions
         body['reportRequests'][0]['metrics'] = metrics
-
+        if dimensions_filter:
+            body['reportRequests'][0]['dimensionFilterClauses'] = dimensions_filter
+        
         return body
 
     def dimensions(self, dimensions_name):
@@ -100,7 +110,13 @@ class Report(object):
             
             for dimension in dimensions_name:
                 dimensions_result.append({'name': 'ga:{}'.format(dimension)})
+        
         return dimensions_result
+
+
+    def dimensions_filter(self, dimensions_filter_name):
+
+        return dimensions_filter_name
 
     def metrics(self, metrics_name):
         # metricsデータの取得
@@ -122,8 +138,15 @@ if __name__ == '__main__':
         view_id = f.read()
     
     KEY_FILE = '/mnt/c/Users/warik/Documents/PYTHON/science/GoogleアナリティクスAPI/client_secrets.json'
+    dimensions_filter = [{'filters': {'dimensionName': 'ga:pagePath', 'expressions': ['/blogs/detail/']}}]
     report = Report(key_file=KEY_FILE, view_id=view_id)
-    columns, datas = report.response()
+    columns, datas = report.response(
+            start='2023-01-12',
+            end='2023-01-12',
+            dimensions=['date', 'pagepath'],
+            metrics='publicher',
+            dimensions_filter=dimensions_filter,
+    )
     print(columns)
     print('-------')
     print(datas)
