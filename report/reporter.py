@@ -35,13 +35,17 @@ class Report(object):
             ad_columns_list.append(rows['columnHeader']['dimensions'][0])
             if len(requests['reportRequests'][0]['dimensions']) > 1:
                 ad_columns_list.append(rows['columnHeader']['dimensions'][1])
+                if len(requests['reportRequests'][0]['dimensions']) > 2:
+                    ad_columns_list.append(rows['columnHeader']['dimensions'][2])
             for row in rows['columnHeader']['metricHeader']['metricHeaderEntries']:
                 ad_columns_list.append(row['name'])
 
         try: # dimensions_filter次第では値が無い可能性があるので特設tra＆error文
             # レポートのバリューをデータフレーム用にリスト内包表記で取得
-            if len(requests['reportRequests'][0]['dimensions']) > 1:
+            if len(requests['reportRequests'][0]['dimensions']) == 2:
                 ad_lists = [[rows['dimensions'][0], rows['dimensions'][1]] + rows['metrics'][0]['values'] for rows in response['reports'][0]['data']['rows']]
+            elif len(requests['reportRequests'][0]['dimensions']) == 3:
+                ad_lists = [[rows['dimensions'][0], rows['dimensions'][1], rows['dimensions'][2]] + rows['metrics'][0]['values'] for rows in response['reports'][0]['data']['rows']]
             else:
                 ad_lists = [[rows['dimensions'][0]] + rows['metrics'][0]['values'] for rows in response['reports'][0]['data']['rows']]
         except KeyError:
@@ -89,13 +93,18 @@ class Report(object):
                     'dateRanges': [{'startDate': start, 'endDate': end}],
                     'dimensions': [],
                     'metrics': [],
+                    'dimensionFilterClauses':[
+                        {
+                            'filters': [],
+                        }
+                    ],
                 }]
         }
 
         body['reportRequests'][0]['dimensions'] = dimensions
         body['reportRequests'][0]['metrics'] = metrics
         if dimensions_filter:
-            body['reportRequests'][0]['dimensionFilterClauses'] = dimensions_filter
+            body['reportRequests'][0]['dimensionFilterClauses'][0]['filters'] = dimensions_filter
         
         return body
 
@@ -138,12 +147,12 @@ if __name__ == '__main__':
         view_id = f.read()
     
     KEY_FILE = '/mnt/c/Users/warik/Documents/PYTHON/science/GoogleアナリティクスAPI/client_secrets.json'
-    dimensions_filter = [{'filters': {'dimensionName': 'ga:pagePath', 'expressions': ['/blogs/detail/']}}]
+    dimensions_filter = {'dimensionName': 'ga:pagetitle', 'expressions': ['django']}
     report = Report(key_file=KEY_FILE, view_id=view_id)
     columns, datas = report.response(
             start='2023-01-12',
             end='2023-01-12',
-            dimensions=['date', 'pagepath'],
+            dimensions=['date', 'pagepath', 'pagetitle'],
             metrics='publicher',
             dimensions_filter=dimensions_filter,
     )
